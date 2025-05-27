@@ -51,13 +51,21 @@ This web application allows users to:
 
 ## 📦 Installation (Local)
 
-1. Clone the repo:
-```bash```
+1. **Clone the repository**:
+
+    ```bash
     git clone https://github.com/jais001-sushant/Solar-AI-Assistant.git
-    cd solar-ai-assistant
+    cd Solar-AI-Assistant
+    ```
 
-2. Install dependencies:
+2. **Install dependencies**:
+
+    ```bash
     pip install -r requirements.txt
+    ```
 
-3. Run the app:
+3. **Run the app**:
+
+    ```bash
     streamlit run app.py
+    ```
