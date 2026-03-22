@@ -97,26 +97,6 @@ Solar AI Assistant/
 
 ## 📦 Installation (Local)
 
-<<<<<<< HEAD
-1. **Clone the repository**:
-
-    ```bash
-    git clone https://github.com/jais001-sushant/Solar-AI-Assistant.git
-    cd Solar-AI-Assistant
-    ```
-
-2. **Install dependencies**:
-
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-3. **Run the app**:
-
-    ```bash
-    streamlit run app.py
-    ```
-=======
 **Step 1 — Clone the repository**
 ```bash
 git clone https://github.com/jais001-sushant/Solar-AI-Assistant.git
@@ -153,4 +133,3 @@ Open `http://localhost:8501` in your browser.
 ## ⚙️ Configuration
 
 The app works without an API key — all financial calculations are fully functional. The Anthropic API key is only needed for the AI rooftop analysis feature (roof type, shading detection etc).
->>>>>>> d705b5f (Initial commit - Solar AI Assistant)
