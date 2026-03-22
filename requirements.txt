@@ -1,4 +1,9 @@
 streamlit
-opencv-python
+anthropic
+opencv-python-headless
 numpy
 Pillow
+plotly
+pandas
+reportlab
+python-dotenv
