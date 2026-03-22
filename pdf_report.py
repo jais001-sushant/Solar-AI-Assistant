@@ -1,0 +1,138 @@
+from reportlab.lib.pagesizes import A4
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import cm
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable
+from reportlab.lib.enums import TA_CENTER
+import io
+from datetime import datetime
+from utils import format_inr_pdf as format_inr
+
+def generate_pdf_report(results, ai_data, city, panel_type, area_m2):
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buffer, pagesize=A4,
+        rightMargin=2*cm, leftMargin=2*cm,
+        topMargin=2*cm,   bottomMargin=2*cm
+    )
+
+    styles = getSampleStyleSheet()
+    elements = []
+
+    title_style = ParagraphStyle(
+        "title", parent=styles["Title"],
+        fontSize=22, textColor=colors.HexColor("#FF8C00"),
+        spaceAfter=6, alignment=TA_CENTER
+    )
+    subtitle_style = ParagraphStyle(
+        "subtitle", parent=styles["Normal"],
+        fontSize=11, textColor=colors.HexColor("#555555"),
+        spaceAfter=4, alignment=TA_CENTER
+    )
+    section_style = ParagraphStyle(
+        "section", parent=styles["Heading2"],
+        fontSize=13, textColor=colors.HexColor("#002765"),
+        spaceBefore=14, spaceAfter=6
+    )
+
+
+    elements.append(Paragraph("Solar AI Assistant", title_style))
+    elements.append(Paragraph("Solar Panel Installation Report", subtitle_style))
+    elements.append(Paragraph(
+        f"Generated on: {datetime.now().strftime('%d %B %Y, %I:%M %p')}",
+        subtitle_style
+    ))
+    elements.append(HRFlowable(width="100%", thickness=2, color=colors.HexColor("#FF8C00")))
+    elements.append(Spacer(1, 0.4*cm))
+
+
+    elements.append(Paragraph("Project Summary", section_style))
+    elements.append(_build_table([
+        ["City",             city],
+        ["Panel Type",       panel_type],
+        ["Rooftop Area",     f"{area_m2} m2"],
+        ["Number of Panels", str(results["num_panels"])],
+        ["System Size",      f"{results['system_kw']} kW"],
+        ["Sun Hours/Day",    f"{results['sun_hours']} hrs"],
+        ["Electricity Rate", f"Rs.{results['electricity_rate']}/kWh"],
+    ]))
+    elements.append(Spacer(1, 0.3*cm))
+
+
+    if ai_data:
+        elements.append(Paragraph("AI Rooftop Analysis", section_style))
+        elements.append(_build_table([
+            ["Roof Type",          ai_data.get("roof_type", "N/A").capitalize()],
+            ["Shading Level",      ai_data.get("shading_level", "N/A").capitalize()],
+            ["Roof Condition",     ai_data.get("roof_condition", "N/A").capitalize()],
+            ["Orientation",        ai_data.get("orientation", "N/A").capitalize()],
+            ["Solar Suitability",  ai_data.get("solar_suitability", "N/A").capitalize()],
+            ["Confidence Score",   f"{round(ai_data.get('confidence', 0) * 100, 1)}%"],
+            ["Obstacles",          ", ".join(ai_data.get("obstacles", [])) or "None detected"],
+            ["Recommendation",     ai_data.get("recommended_placement", "N/A")],
+        ]))
+        elements.append(Spacer(1, 0.3*cm))
+
+
+    elements.append(Paragraph("Energy Output", section_style))
+    elements.append(_build_table([
+        ["Annual Energy Production", f"{results['energy_kwh_year']:,.2f} kWh/year"],
+        ["Average Monthly Output",   f"{results['energy_kwh_year']/12:,.2f} kWh/month"],
+    ]))
+    elements.append(Spacer(1, 0.3*cm))
+
+
+    elements.append(Paragraph("Financial Estimates", section_style))
+    elements.append(_build_table([
+        ["Panel Cost",                 format_inr(results['panel_cost'])],
+        ["Labor Cost",                 format_inr(results['labor_cost'])],
+        ["Total Installation Cost",    format_inr(results['install_cost'])],
+        ["Govt Subsidy (PM Surya Ghar)", format_inr(results['subsidy'])],
+        ["Net Cost After Subsidy",     format_inr(results['net_cost'])],
+        ["Yearly Electricity Savings", format_inr(results['yearly_savings'])],
+        ["Yearly Maintenance Cost",    format_inr(results['yearly_maintenance'])],
+        ["Net Yearly Savings",         format_inr(results['net_yearly_savings'])],
+        ["Payback Period",             f"{results['payback_years']} years"],
+        ["ROI",                        f"{results['roi_percent']}%"],
+        ["Total Lifetime Savings",     format_inr(results['total_lifetime_savings'])],
+    ]))
+    elements.append(Spacer(1, 0.3*cm))
+
+
+    elements.append(Paragraph("Environmental Impact", section_style))
+    elements.append(_build_table([
+        ["CO2 Saved per Year",       f"{results['co2_kg']:,.2f} kg"],
+        ["CO2 Saved (Tonnes/Year)",  f"{results['co2_tonnes']} tonnes"],
+        ["Carbon Credit Value",      format_inr(results['carbon_credit_value']) + "/year"],
+    ]))
+    elements.append(Spacer(1, 0.5*cm))
+
+
+    elements.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor("#dddddd")))
+    elements.append(Spacer(1, 0.2*cm))
+    elements.append(Paragraph(
+        "Generated by Solar AI Assistant | For informational purposes only.",
+        ParagraphStyle("footer", parent=styles["Normal"],
+                       fontSize=8, textColor=colors.gray, alignment=TA_CENTER)
+    ))
+
+    doc.build(elements)
+    buffer.seek(0)
+    return buffer
+
+
+def _build_table(data):
+    table = Table(data, colWidths=[8*cm, 9*cm])
+    table.setStyle(TableStyle([
+        ("BACKGROUND",    (0, 0), (0, -1), colors.HexColor("#f0f4ff")),
+        ("TEXTCOLOR",     (0, 0), (0, -1), colors.HexColor("#002765")),
+        ("FONTNAME",      (0, 0), (0, -1), "Helvetica-Bold"),
+        ("FONTSIZE",      (0, 0), (-1, -1), 10),
+        ("BACKGROUND",    (1, 0), (1, -1), colors.white),
+        ("TEXTCOLOR",     (1, 0), (1, -1), colors.HexColor("#333333")),
+        ("ROWBACKGROUNDS",(0, 0), (-1, -1), [colors.HexColor("#f9f9f9"), colors.white]),
+        ("GRID",          (0, 0), (-1, -1), 0.5, colors.HexColor("#dddddd")),
+        ("PADDING",       (0, 0), (-1, -1), 8),
+        ("VALIGN",        (0, 0), (-1, -1), "MIDDLE"),
+    ]))
+    return table
