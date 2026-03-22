@@ -10,7 +10,7 @@ An AI-powered rooftop analysis web app that helps Indian homeowners estimate sol
 ---
 
 ## 🚀 Live Demo
-👉 [Click here to view the app](https://your-app-link.streamlit.app)
+👉 [Click here to view the app](https://jais001sushant-solar-ai-assistant.streamlit.app/)
 
 ---
 
